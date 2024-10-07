@@ -29,7 +29,7 @@
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/swingdb.git
+   git clone https://github.com/realgolgames/swingdb.git
    cd swingdb
     ```
 
