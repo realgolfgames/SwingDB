@@ -14,6 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// Try to parse the incoming JSON
 	let video: string;
+
 	try {
 		const data = await request.json();
 		video = data.video; // Assuming the video is sent as a base64 string
@@ -47,6 +48,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			await golf_swing_chunk.save();
 		}
 
+		await analyzeSwing(video_id);
+
 		return new Response(JSON.stringify({ message: 'Video uploaded successfully', video_id }), {
 			status: 200
 		});
@@ -64,11 +67,6 @@ export const POST: RequestHandler = async ({ request }) => {
  * @returns {string[] | Error} - An array of base64 string chunks or an Error object.
  */
 function splitIntoChunks(base64String: string, chunkSize = CHUNK_SIZE): string[] | Error {
-	// Check if the video is larger than 10MB and return an error
-	if (base64String.length > chunkSize) {
-		return new Error('Video size exceeds 10MB limit');
-	}
-
 	const numChunks = Math.ceil(base64String.length / chunkSize);
 	const chunks: string[] = [];
 
@@ -78,4 +76,27 @@ function splitIntoChunks(base64String: string, chunkSize = CHUNK_SIZE): string[]
 	}
 
 	return chunks;
+}
+
+async function analyzeSwing(video_id: string) {
+	// Implement your swing analysis logic here
+
+	// Get all chunks of the video and concatenate them
+
+	const chunks = await golf_swing_chunks_model.find({ video_id });
+
+	if (!chunks) {
+		return new Error('No chunks found');
+	}
+
+	const video = chunks
+		.toSorted((a, b) => a.item_number - b.item_number)
+		.map((chunk) => chunk.chunk)
+		.join('');
+
+	// Convert video string to a video
+
+	const video_buffer = Buffer.from(video, 'base64');
+
+	console.log(video_buffer);
 }
